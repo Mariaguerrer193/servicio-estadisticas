@@ -1,18 +1,24 @@
 package ec.edu.utn.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import ec.edu.utn.model.Partido;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
+
 
 @ApplicationScoped
 public class PartidoRepository {
 
     @PersistenceContext(unitName = "EstadisticasPU")
     private EntityManager em;
+
+    @Inject
+    private AuditoriaRepository auditoriaRepo;
 
     // Listar todos (calendario completo)
     public List<Partido> listarTodos() {
@@ -49,6 +55,10 @@ public class PartidoRepository {
         partido.setGolesLocal(golesLocal);
         partido.setGolesVisitante(golesVisitante);
         partido.setEstado("FINALIZADO");
+
+        String detalle = "Resultado: " + golesLocal + " - " + golesVisitante;
+        auditoriaRepo.registrar(null, "REGISTRAR_RESULTADO", "PARTIDO", partido.getId(), detalle);
+
         return Optional.of(partido);
     }
 }
