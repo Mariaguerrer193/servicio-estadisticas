@@ -19,8 +19,9 @@ public class Partido {
     @Column(name = "numero_partido_fifa")
     private Integer numeroPartidoFifa;
 
-    @Column(nullable = false, length = 30)
-    private String fase;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "fase", nullable = false)
+    private Fase fase;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "grupo_codigo")
@@ -72,11 +73,11 @@ public class Partido {
         this.numeroPartidoFifa = numeroPartidoFifa;
     }
 
-    public String getFase() {
+    public Fase getFase() {
         return fase;
     }
 
-    public void setFase(String fase) {
+    public void setFase(Fase fase) {
         this.fase = fase;
     }
 
