@@ -1,15 +1,16 @@
 package ec.edu.utn.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
+import org.mindrot.jbcrypt.BCrypt;
+
 import ec.edu.utn.model.Usuario;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.mindrot.jbcrypt.BCrypt;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 @ApplicationScoped
 public class UsuarioRepository {
@@ -58,5 +59,14 @@ public class UsuarioRepository {
         u.setPasswordHash(hash);
         em.persist(u);
         return u;
+    }
+
+    // Verifica username + contraseña en texto plano. Devuelve el usuario si son correctos.
+    public Optional<Usuario> verificarCredenciales(String username, String passwordPlano) {
+        Optional<Usuario> usuario = buscarPorUsername(username);
+        if (usuario.isPresent() && BCrypt.checkpw(passwordPlano, usuario.get().getPasswordHash())) {
+            return usuario;
+        }
+        return Optional.empty();
     }
 }
