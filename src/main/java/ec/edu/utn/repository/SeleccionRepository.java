@@ -1,7 +1,9 @@
 package ec.edu.utn.repository;
 
 import ec.edu.utn.model.Seleccion;
+import ec.edu.utn.model.Usuario;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -13,6 +15,12 @@ public class SeleccionRepository {
 
     @PersistenceContext(unitName = "EstadisticasPU")
     private EntityManager em;
+@Inject
+    private AuditoriaRepository auditoriaRepo;
+
+    @Inject
+    private UsuarioRepository usuarioRepo;
+
 
     // Listar todas
     public List<Seleccion> listarTodas() {
@@ -37,5 +45,27 @@ public class SeleccionRepository {
     public Seleccion crear(Seleccion s) {
         em.persist(s);
         return s;
+    }
+
+
+    // Actualizar (RF10)
+    @Transactional
+    public Optional<Seleccion> actualizar(Long id, Seleccion datos, Long usuarioId) {
+        Seleccion seleccion = em.find(Seleccion.class, id);
+        if (seleccion == null) {
+            return Optional.empty();
+        }
+        seleccion.setNombre(datos.getNombre());
+        seleccion.setConfederacion(datos.getConfederacion());
+        seleccion.setEsAnfitrion(datos.getEsAnfitrion());
+        seleccion.setClasificacion(datos.getClasificacion());
+        if (datos.getGrupo() != null) {
+            seleccion.setGrupo(datos.getGrupo());
+        }
+
+        Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
+        auditoriaRepo.registrar(usuario, "ACTUALIZAR_SELECCION", "SELECCION", id, "Datos actualizados");
+
+        return Optional.of(seleccion);
     }
 }
