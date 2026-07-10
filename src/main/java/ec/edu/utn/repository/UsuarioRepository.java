@@ -7,16 +7,23 @@ import java.util.regex.Pattern;
 import org.mindrot.jbcrypt.BCrypt;
 
 import ec.edu.utn.model.Usuario;
+import ec.edu.utn.model.Rol;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class UsuarioRepository {
 
     @PersistenceContext(unitName = "EstadisticasPU")
     private EntityManager em;
+
+    @Inject
+    private AuditoriaRepository auditoriaRepo;
+
+
 
     // Formato de correo válido (algo@algo.algo)
     private static final Pattern EMAIL_PATTERN =
@@ -68,5 +75,26 @@ public class UsuarioRepository {
             return usuario;
         }
         return Optional.empty();
+    }
+
+
+    // Actualizar datos básicos (NO la contraseña, eso merece su propio endpoint)
+    @Transactional
+    public Optional<Usuario> actualizar(Long id, String nombre, String email, Rol nuevoRol, Long usuarioQueEdita) {
+        Usuario usuario = em.find(Usuario.class, id);
+        if (usuario == null) {
+            return Optional.empty();
+        }
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            throw new IllegalArgumentException("El correo no tiene un formato válido");
+        }
+        usuario.setNombre(nombre);
+        usuario.setEmail(email);
+        usuario.setRol(nuevoRol);
+
+        Usuario editor = usuarioQueEdita != null ? buscarPorId(usuarioQueEdita).orElse(null) : null;
+        auditoriaRepo.registrar(editor, "ACTUALIZAR_USUARIO", "USUARIO", id, "Datos actualizados");
+
+        return Optional.of(usuario);
     }
 }

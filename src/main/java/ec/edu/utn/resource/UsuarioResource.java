@@ -10,6 +10,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
+import ec.edu.utn.security.RequiereAutenticacion;
+import ec.edu.utn.security.RequiereRol;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
+
 
 @Path("/usuarios")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -21,6 +26,9 @@ public class UsuarioResource {
 
     @Inject
     private RolRepository rolRepo;
+
+    @Context
+    private HttpServletRequest servletRequest;
 
     // GET /api/usuarios — listar todos (sin exponer password_hash, gracias a @JsonIgnore)
     @GET
@@ -71,6 +79,41 @@ public class UsuarioResource {
         public String nombre;
         public String email;
         public String password;
+        public Long rolId;
+    }
+
+    // PUT /api/usuarios/{id} — actualizar datos básicos (NO contraseña)
+    @RequiereAutenticacion
+    @RequiereRol("ADMINISTRADOR")
+    @PUT
+    @Path("/{id}")
+    public Response actualizar(@PathParam("id") Long id, ActualizarRequest req) {
+        Optional<Rol> rol = rolRepo.buscarPorId(req.rolId);
+        if (rol.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"El rol especificado no existe\"}")
+                    .build();
+        }
+
+        Long usuarioQueEdita = (Long) servletRequest.getAttribute("userId");
+
+        try {
+            Optional<Usuario> actualizado = repo.actualizar(id, req.nombre, req.email, rol.get(), usuarioQueEdita);
+            if (actualizado.isPresent()) {
+                return Response.ok(actualizado.get()).build();
+            }
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
+    // Clase para recibir el JSON de actualización (sin password)
+    public static class ActualizarRequest {
+        public String nombre;
+        public String email;
         public Long rolId;
     }
 }
