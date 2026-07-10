@@ -1,5 +1,8 @@
 package ec.edu.utn.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import ec.edu.utn.model.Seleccion;
 import ec.edu.utn.model.Usuario;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -7,8 +10,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class SeleccionRepository {
@@ -64,7 +65,7 @@ public class SeleccionRepository {
         }
 
         Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
-        auditoriaRepo.registrar(usuario, "ACTUALIZAR_SELECCION", "SELECCION", id, "Datos actualizados");
+       auditoriaRepo.registrar(usuario, "ACTUALIZAR_SELECCION", "SELECCION", String.valueOf(id), "Datos actualizados");
 
         return Optional.of(seleccion);
     }

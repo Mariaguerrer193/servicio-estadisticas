@@ -6,13 +6,13 @@ import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-import ec.edu.utn.model.Usuario;
 import ec.edu.utn.model.Rol;
+import ec.edu.utn.model.Usuario;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class UsuarioRepository {
@@ -93,7 +93,7 @@ public class UsuarioRepository {
         usuario.setRol(nuevoRol);
 
         Usuario editor = usuarioQueEdita != null ? buscarPorId(usuarioQueEdita).orElse(null) : null;
-        auditoriaRepo.registrar(editor, "ACTUALIZAR_USUARIO", "USUARIO", id, "Datos actualizados");
+        auditoriaRepo.registrar(editor, "ACTUALIZAR_USUARIO", "USUARIO", String.valueOf(id), "Datos actualizados");
 
         return Optional.of(usuario);
     }

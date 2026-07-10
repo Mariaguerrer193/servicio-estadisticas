@@ -1,14 +1,15 @@
 package ec.edu.utn.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import ec.edu.utn.model.Grupo;
+import ec.edu.utn.model.Usuario;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
-import ec.edu.utn.model.Usuario;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class GrupoRepository {
@@ -50,7 +51,7 @@ public class GrupoRepository {
         grupo.setNombre(datos.getNombre());
 
         Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
-        auditoriaRepo.registrar(usuario, "ACTUALIZAR_GRUPO", "GRUPO", null, "Codigo: " + codigo);
+        auditoriaRepo.registrar(usuario, "ACTUALIZAR_GRUPO", "GRUPO", codigo, "Datos actualizados");
 
         return Optional.of(grupo);
     }

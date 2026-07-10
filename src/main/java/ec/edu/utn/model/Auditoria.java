@@ -29,8 +29,8 @@ public class Auditoria {
     @Column(name = "entidad_afectada", nullable = false, length = 50)
     private String entidadAfectada;
 
-    @Column(name = "entidad_id")
-    private Long entidadId;
+    @Column(name = "entidad_id", length = 50)
+    private String entidadId;
 
     @Column(length = 255)
     private String detalle;
@@ -44,7 +44,7 @@ public class Auditoria {
     }
 
     // Constructor de conveniencia, para crear registros fácilmente desde otros repositorios
-    public Auditoria(Usuario usuario, String accion, String entidadAfectada, Long entidadId, String detalle) {
+    public Auditoria(Usuario usuario, String accion, String entidadAfectada, String entidadId, String detalle) {
         this.usuario = usuario;
         this.accion = accion;
         this.entidadAfectada = entidadAfectada;
@@ -87,11 +87,11 @@ public class Auditoria {
         this.entidadAfectada = entidadAfectada;
     }
 
-    public Long getEntidadId() {
+    public String getEntidadId() {
         return entidadId;
     }
 
-    public void setEntidadId(Long entidadId) {
+    public void setEntidadId(String entidadId) {
         this.entidadId = entidadId;
     }
 

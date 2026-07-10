@@ -22,7 +22,7 @@ public class AuditoriaRepository {
 
     // Método reutilizable: otros repositorios lo llaman para dejar registro de una acción
     @Transactional
-    public void registrar(Usuario usuario, String accion, String entidadAfectada, Long entidadId, String detalle) {
+    public void registrar(Usuario usuario, String accion, String entidadAfectada, String entidadId, String detalle) {
         Auditoria a = new Auditoria(usuario, accion, entidadAfectada, entidadId, detalle);
         em.persist(a);
     }

@@ -61,7 +61,7 @@ public class PartidoRepository {
         partido.setEstado("FINALIZADO");
 
         String detalle = "Resultado: " + golesLocal + " - " + golesVisitante;
-        auditoriaRepo.registrar(null, "REGISTRAR_RESULTADO", "PARTIDO", partido.getId(), detalle);
+        auditoriaRepo.registrar(null, "REGISTRAR_RESULTADO", "PARTIDO", String.valueOf(partido.getId()), detalle);
 
         return Optional.of(partido);
     }
@@ -83,7 +83,7 @@ public class PartidoRepository {
         partido.setSede(datos.getSede());
 
         Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
-        auditoriaRepo.registrar(usuario, "ACTUALIZAR_PARTIDO", "PARTIDO", id, "Datos generales actualizados");
+        auditoriaRepo.registrar(usuario, "ACTUALIZAR_PARTIDO", "PARTIDO", String.valueOf(id), "Datos generales actualizados");
 
         return Optional.of(partido);
     }
