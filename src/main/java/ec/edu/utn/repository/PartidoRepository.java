@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import ec.edu.utn.model.Usuario;
 
 
 @ApplicationScoped
@@ -19,6 +20,9 @@ public class PartidoRepository {
 
     @Inject
     private AuditoriaRepository auditoriaRepo;
+
+    @Inject
+    private UsuarioRepository usuarioRepo;
 
     // Listar todos (calendario completo)
     public List<Partido> listarTodos() {
@@ -58,6 +62,28 @@ public class PartidoRepository {
 
         String detalle = "Resultado: " + golesLocal + " - " + golesVisitante;
         auditoriaRepo.registrar(null, "REGISTRAR_RESULTADO", "PARTIDO", partido.getId(), detalle);
+
+        return Optional.of(partido);
+    }
+
+    // Actualizar datos generales del partido (fecha, sede, fase, grupo, selecciones)
+    // Distinto de registrarResultado(), que es solo para el marcador oficial
+    @Transactional
+    public Optional<Partido> actualizar(Long id, Partido datos, Long usuarioId) {
+        Partido partido = em.find(Partido.class, id);
+        if (partido == null) {
+            return Optional.empty();
+        }
+        partido.setNumeroPartidoFifa(datos.getNumeroPartidoFifa());
+        partido.setFase(datos.getFase());
+        partido.setGrupo(datos.getGrupo());
+        partido.setSeleccionLocal(datos.getSeleccionLocal());
+        partido.setSeleccionVisitante(datos.getSeleccionVisitante());
+        partido.setFechaHoraUtc(datos.getFechaHoraUtc());
+        partido.setSede(datos.getSede());
+
+        Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
+        auditoriaRepo.registrar(usuario, "ACTUALIZAR_PARTIDO", "PARTIDO", id, "Datos generales actualizados");
 
         return Optional.of(partido);
     }

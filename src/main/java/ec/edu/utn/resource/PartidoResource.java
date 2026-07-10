@@ -10,6 +10,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
+
 
 @Path("/partidos")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -18,6 +21,9 @@ public class PartidoResource {
 
     @Inject
     private PartidoRepository repo;
+
+    @Context
+    private HttpServletRequest servletRequest;
 
     // GET /api/partidos — calendario completo (o filtrado por grupo)
     @GET
@@ -63,5 +69,19 @@ public class PartidoResource {
     public static class ResultadoRequest {
         public Integer golesLocal;
         public Integer golesVisitante;
+    }
+
+    // PUT /api/partidos/{id} — actualizar datos generales (fecha, sede, fase, grupo, selecciones)
+    @RequiereAutenticacion
+    @RequiereRol("ADMINISTRADOR")
+    @PUT
+    @Path("/{id}")
+    public Response actualizar(@PathParam("id") Long id, Partido datos) {
+        Long usuarioId = (Long) servletRequest.getAttribute("userId");
+        Optional<Partido> actualizado = repo.actualizar(id, datos, usuarioId);
+        if (actualizado.isPresent()) {
+            return Response.ok(actualizado.get()).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 }
