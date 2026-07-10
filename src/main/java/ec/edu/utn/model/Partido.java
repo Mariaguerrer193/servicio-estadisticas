@@ -35,6 +35,7 @@ public class Partido {
     @JoinColumn(name = "seleccion_visitante_id", nullable = false)
     private Seleccion seleccionVisitante;
 
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     @Column(name = "fecha_hora_utc", nullable = false)
     private OffsetDateTime fechaHoraUtc;
 

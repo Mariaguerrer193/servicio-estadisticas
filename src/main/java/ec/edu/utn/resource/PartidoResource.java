@@ -2,6 +2,7 @@ package ec.edu.utn.resource;
 
 import ec.edu.utn.model.Partido;
 import ec.edu.utn.repository.PartidoRepository;
+import ec.edu.utn.security.RequiereAutenticacion;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -45,6 +46,7 @@ public class PartidoResource {
     }
 
     // PUT /api/partidos/{id}/resultado — registrar resultado oficial (RF11)
+    @RequiereAutenticacion
     @PUT
     @Path("/{id}/resultado")
     public Response registrarResultado(@PathParam("id") Long id, ResultadoRequest resultado) {
