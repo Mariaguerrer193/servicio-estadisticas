@@ -7,12 +7,20 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import ec.edu.utn.model.Usuario;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class SedeRepository {
 
     @PersistenceContext(unitName = "EstadisticasPU")
     private EntityManager em;
+
+    @Inject
+    private AuditoriaRepository auditoriaRepo;
+
+    @Inject
+    private UsuarioRepository usuarioRepo;
 
     // Listar todas
     public List<Sede> listarTodas() {
@@ -29,5 +37,24 @@ public class SedeRepository {
     public Sede crear(Sede s) {
         em.persist(s);
         return s;
+    }
+
+
+    // Actualizar
+    @Transactional
+    public Optional<Sede> actualizar(Long id, Sede datos, Long usuarioId) {
+        Sede sede = em.find(Sede.class, id);
+        if (sede == null) {
+            return Optional.empty();
+        }
+        sede.setNombre(datos.getNombre());
+        sede.setCiudad(datos.getCiudad());
+        sede.setPais(datos.getPais());
+        sede.setCapacidadAprox(datos.getCapacidadAprox());
+
+        Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
+        auditoriaRepo.registrar(usuario, "ACTUALIZAR_SEDE", "SEDE", id, "Datos actualizados");
+
+        return Optional.of(sede);
     }
 }
