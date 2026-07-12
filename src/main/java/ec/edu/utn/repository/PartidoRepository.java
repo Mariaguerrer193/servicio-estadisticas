@@ -87,4 +87,22 @@ public class PartidoRepository {
 
         return Optional.of(partido);
     }
+
+
+    // Listar partidos FINALIZADOS de un grupo (para calcular posiciones/estadísticas)
+    public List<Partido> listarFinalizadosPorGrupo(String codigoGrupo) {
+        return em.createQuery(
+                "SELECT p FROM Partido p WHERE p.grupo.codigo = :codigo AND p.estado = 'FINALIZADO'", Partido.class)
+                .setParameter("codigo", codigoGrupo)
+                .getResultList();
+    }
+
+    // Listar TODOS los partidos finalizados de una selección (sin importar el grupo, útil para fases eliminatorias futuras)
+    public List<Partido> listarFinalizadosPorSeleccion(Long seleccionId) {
+        return em.createQuery(
+                "SELECT p FROM Partido p WHERE (p.seleccionLocal.id = :id OR p.seleccionVisitante.id = :id) AND p.estado = 'FINALIZADO'",
+                Partido.class)
+                .setParameter("id", seleccionId)
+                .getResultList();
+    }
 }

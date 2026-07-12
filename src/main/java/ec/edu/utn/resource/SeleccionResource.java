@@ -1,17 +1,27 @@
 package ec.edu.utn.resource;
 
+import java.util.List;
+import java.util.Optional;
+
+import ec.edu.utn.model.EstadisticaSeleccion;
 import ec.edu.utn.model.Seleccion;
 import ec.edu.utn.repository.SeleccionRepository;
 import ec.edu.utn.security.RequiereAutenticacion;
 import ec.edu.utn.security.RequiereRol;
+import ec.edu.utn.service.EstadisticaService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.List;
-import java.util.Optional;
 
 @Path("/selecciones")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -20,6 +30,9 @@ public class SeleccionResource {
 
     @Inject
     private SeleccionRepository repo;
+
+    @Inject
+    private EstadisticaService estadisticaService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -63,6 +76,17 @@ public class SeleccionResource {
         Optional<Seleccion> actualizada = repo.actualizar(id, datos, usuarioId);
         if (actualizada.isPresent()) {
             return Response.ok(actualizada.get()).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    // GET /api/selecciones/{id}/estadisticas (RF07)
+    @GET
+    @Path("/{id}/estadisticas")
+    public Response estadisticas(@PathParam("id") Long id) {
+        Optional<EstadisticaSeleccion> estadistica = estadisticaService.calcularEstadisticas(id);
+        if (estadistica.isPresent()) {
+            return Response.ok(estadistica.get()).build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
