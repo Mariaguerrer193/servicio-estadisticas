@@ -1,9 +1,11 @@
 package ec.edu.utn.resource;
 
+
 import ec.edu.utn.model.Partido;
 import ec.edu.utn.repository.PartidoRepository;
 import ec.edu.utn.security.RequiereAutenticacion;
 import ec.edu.utn.security.RequiereRol;
+import ec.edu.utn.dto.ResultadoRequest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -57,19 +59,37 @@ public class PartidoResource {
     @RequiereRol("ADMINISTRADOR")
     @PUT
     @Path("/{id}/resultado")
-    public Response registrarResultado(@PathParam("id") Long id, ResultadoRequest resultado) {
-        Optional<Partido> actualizado = repo.registrarResultado(id, resultado.golesLocal, resultado.golesVisitante);
-        if (actualizado.isPresent()) {
-            return Response.ok(actualizado.get()).build();
-        }
-        return Response.status(Response.Status.NOT_FOUND).build();
+    public Response registrarResultado(
+        @PathParam("id") Long id,
+        ResultadoRequest resultado) {
+
+    if (resultado == null
+            || resultado.getGolesLocal() == null
+            || resultado.getGolesVisitante() == null) {
+
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Los goles local y visitante son obligatorios.")
+                .build();
     }
 
-    // Clase interna simple para recibir el JSON del resultado
-    public static class ResultadoRequest {
-        public Integer golesLocal;
-        public Integer golesVisitante;
+    if (resultado.getGolesLocal() < 0 || resultado.getGolesVisitante() < 0) {
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Los goles no pueden ser negativos.")
+                .build();
     }
+
+    Optional<Partido> actualizado = repo.registrarResultado(
+            id,
+            resultado.getGolesLocal(),
+            resultado.getGolesVisitante()
+    );
+
+    if (actualizado.isPresent()) {
+        return Response.ok(actualizado.get()).build();
+    }
+
+    return Response.status(Response.Status.NOT_FOUND).build();
+}
 
     // PUT /api/partidos/{id} — actualizar datos generales (fecha, sede, fase, grupo, selecciones)
     @RequiereAutenticacion
