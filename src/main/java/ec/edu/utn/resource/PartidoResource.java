@@ -1,9 +1,11 @@
 package ec.edu.utn.resource;
 
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import ec.edu.utn.dto.CambiarEstadoRequest;
 import ec.edu.utn.dto.ResultadoRequest;
 import ec.edu.utn.model.Partido;
 import ec.edu.utn.repository.PartidoRepository;
@@ -112,6 +114,35 @@ public class PartidoResource {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
+
+
+    private static final List<String> ESTADOS_VALIDOS = Arrays.asList("PROGRAMADO", "EN_CURSO", "FINALIZADO", "CANCELADO");
+
+    // PUT /api/partidos/{id}/estado — cambiar estado libremente (panel administrativo)
+    @RequiereAutenticacion
+    @RequiereRol("ADMINISTRADOR")
+    @PUT
+    @Path("/{id}/estado")
+    public Response cambiarEstado(@PathParam("id") Long id, CambiarEstadoRequest request) {
+        if (request == null || request.getEstado() == null || request.getEstado().isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("El campo estado es obligatorio.")
+                    .build();
+        }
+        String nuevoEstado = request.getEstado().toUpperCase();
+        if (!ESTADOS_VALIDOS.contains(nuevoEstado)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Estado inválido. Valores permitidos: " + ESTADOS_VALIDOS)
+                    .build();
+        }
+
+    Long usuarioId = (Long) servletRequest.getAttribute("userId");
+    Optional<Partido> actualizado = repo.cambiarEstado(id, nuevoEstado, usuarioId);
+    if (actualizado.isPresent()) {
+        return Response.ok(actualizado.get()).build();
+    }
+    return Response.status(Response.Status.NOT_FOUND).build();
+}
 
 
     // PUT /api/partidos/{id} — actualizar datos generales (fecha, sede, fase, grupo, selecciones)

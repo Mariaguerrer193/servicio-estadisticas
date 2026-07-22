@@ -83,6 +83,31 @@ public class PartidoRepository {
         return Optional.of(partido);
     }
 
+
+        // Cambiar estado directamente (para el panel administrativo)
+    @Transactional
+    public Optional<Partido> cambiarEstado(Long id, String nuevoEstado, Long usuarioId) {
+        Partido partido = em.find(Partido.class, id);
+        if (partido == null) {
+            return Optional.empty();
+        }
+        partido.setEstado(nuevoEstado);
+
+        // Si se cancela o se vuelve a PROGRAMADO/EN_CURSO, limpiamos los goles
+        if (!"FINALIZADO".equals(nuevoEstado)) {
+            partido.setGolesLocal(null);
+            partido.setGolesVisitante(null);
+        }
+
+        Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
+        auditoriaRepo.registrar(usuario, "CAMBIAR_ESTADO", "PARTIDO", String.valueOf(id), "Estado cambiado a " + nuevoEstado);
+
+        return Optional.of(partido);
+    }
+
+
+
+
     // Actualizar datos generales del partido (fecha, sede, fase, grupo, selecciones)
     // Distinto de registrarResultado(), que es solo para el marcador oficial
     @Transactional
