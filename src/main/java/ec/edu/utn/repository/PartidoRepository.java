@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import ec.edu.utn.model.Partido;
+import ec.edu.utn.model.Usuario;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import ec.edu.utn.model.Usuario;
 
 
 @ApplicationScoped
@@ -62,6 +62,23 @@ public class PartidoRepository {
 
         String detalle = "Resultado: " + golesLocal + " - " + golesVisitante;
         auditoriaRepo.registrar(null, "REGISTRAR_RESULTADO", "PARTIDO", String.valueOf(partido.getId()), detalle);
+
+        return Optional.of(partido);
+    }
+
+    // Revertir resultado: vuelve el partido a PROGRAMADO y limpia los goles
+    @Transactional
+    public Optional<Partido> revertir(Long id, Long usuarioId) {
+        Partido partido = em.find(Partido.class, id);
+        if (partido == null) {
+            return Optional.empty();
+        }
+        partido.setEstado("PROGRAMADO");
+        partido.setGolesLocal(null);
+        partido.setGolesVisitante(null);
+
+        Usuario usuario = usuarioId != null ? usuarioRepo.buscarPorId(usuarioId).orElse(null) : null;
+        auditoriaRepo.registrar(usuario, "REVERTIR_RESULTADO", "PARTIDO", String.valueOf(id), "Resultado revertido, estado vuelto a PROGRAMADO");
 
         return Optional.of(partido);
     }

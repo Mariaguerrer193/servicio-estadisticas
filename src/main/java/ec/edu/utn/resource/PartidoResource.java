@@ -1,19 +1,27 @@
 package ec.edu.utn.resource;
 
 
+import java.util.List;
+import java.util.Optional;
+
+import ec.edu.utn.dto.ResultadoRequest;
 import ec.edu.utn.model.Partido;
 import ec.edu.utn.repository.PartidoRepository;
 import ec.edu.utn.security.RequiereAutenticacion;
 import ec.edu.utn.security.RequiereRol;
-import ec.edu.utn.dto.ResultadoRequest;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.List;
-import java.util.Optional;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
 
 
 @Path("/partidos")
@@ -90,6 +98,21 @@ public class PartidoResource {
 
     return Response.status(Response.Status.NOT_FOUND).build();
 }
+
+    // PUT /api/partidos/{id}/revertir — revertir resultado (vuelve a PROGRAMADO)
+    @RequiereAutenticacion
+    @RequiereRol("ADMINISTRADOR")
+    @PUT
+    @Path("/{id}/revertir")
+    public Response revertir(@PathParam("id") Long id) {
+        Long usuarioId = (Long) servletRequest.getAttribute("userId");
+        Optional<Partido> revertido = repo.revertir(id, usuarioId);
+        if (revertido.isPresent()) {
+            return Response.ok(revertido.get()).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
 
     // PUT /api/partidos/{id} — actualizar datos generales (fecha, sede, fase, grupo, selecciones)
     @RequiereAutenticacion
